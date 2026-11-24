@@ -26,11 +26,24 @@ if uploaded_file and api_key:
             Keep it concrete, cite exact numbers from the document, and avoid fluff.
             """
             
-            response = client.models.generate_content(
-                model="gemini-3.8-flash",
-                contents=[
-                    types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf"),
-                    prompt
-                ]
-            )
-            st.markdown(response.text)
+            models_to_try = ["gemini-4-hydrogen", "gemini-3.8-flash", "gemini-4-neon"]
+            success = False
+            
+            for model_name in models_to_try:
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=[
+                            types.Part.from_bytes(data=pdf_bytes, mime_type="application/pdf"),
+                            prompt
+                        ]
+                    )
+                    st.success(f"Analysis Complete! (Powered by {model_name})")
+                    st.markdown(response.text)
+                    success = True
+                    break
+                except Exception as e:
+                    continue
+            
+            if not success:
+                st.warning("Abhi Google ke free servers par traffic bahut zyada hai. Please 2 minute baad dobara try karein ya ek chhota Concall PDF upload karein.")
